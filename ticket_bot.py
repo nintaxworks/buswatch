@@ -74,8 +74,11 @@ def stations() -> dict:
     """code -> {name, code, toRoutesList}; the homepage embeds the full list."""
     global _stations
     if _stations is None:
-        h = requests.get(BASE + "/", headers=HDR, timeout=30).text
-        m = re.search(r'<input[^>]*id="routes-data"[^>]*data-value="([^"]*)"', h)
+        # Plain page request: the XHR header makes the site return a partial page without the list.
+        r = requests.get(BASE + "/", headers={"User-Agent": HDR["User-Agent"]}, timeout=30)
+        m = re.search(r'<input[^>]*id="routes-data"[^>]*data-value="([^"]*)"', r.text)
+        if not m:
+            raise RuntimeError(f"station list not found on homepage (HTTP {r.status_code}, {len(r.text)} bytes)")
         _stations = json.loads(html.unescape(m.group(1)))["route"]
     return _stations
 
