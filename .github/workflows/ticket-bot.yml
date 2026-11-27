@@ -1,4 +1,3 @@
-Ticket bot · YML
 name: ticket-bot
 on:
   schedule:
